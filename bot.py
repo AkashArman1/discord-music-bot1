@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 import wavelink
 import asyncio
+import os
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -11,12 +12,14 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user}!')
-    if not hasattr(bot, 'wavelink'):
-        bot.wavelink = wavelink.Client(bot=bot)
-        await bot.wavelink.initiate_node(
+    # Check if NodePool is already connected
+    if not wavelink.NodePool.nodes:
+        await wavelink.NodePool.create_node(
+            bot=bot,
             host='lava.link',      # Free public Lavalink
             port=2333,
-            password='youshallnotpass'
+            password='youshallnotpass',
+            https=False
         )
     print('Bot ready and connected to Lavalink!')
 
@@ -61,5 +64,4 @@ async def skip(ctx):
     else:
         await ctx.send("Nothing is playing!")
 
-import os
 bot.run(os.getenv("DISCORD_BOT_TOKEN"))
